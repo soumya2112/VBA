@@ -1,0 +1,129 @@
+Sub StockAnalysis()
+
+    Dim ws As Worksheet
+    For Each ws In ActiveWorkbook.Worksheets
+        ws.Activate
+        
+        'Initilization of Header of output
+        Cells(1, "J") = "Total Volume"
+        Cells(1, "I") = "Ticker_row"
+        Cells(1, "K") = " Yearly_Change"
+        Cells(1, "L") = "Percentage_Change"
+        Cells(1, "N") = "Max Ticker"
+        Cells(2, "N") = "Max Change"
+        Cells(3, "N") = "Min Ticker"
+        Cells(4, "N") = "Min Change"
+        
+        'Initilization of type of Variables
+        Dim Ticker As String
+        Dim Volume As Double
+        Dim Total_Volume As Double
+        Dim Ticker_row As String
+        Dim i As Long
+        Dim openstock As Double
+        Dim closestock As Double
+        Dim Yearlychange As Double
+        Dim Percentagechange As Long
+        Dim max_change As Double
+        Dim min_change As Double
+        Dim min_ticker As String
+        Dim max_ticker As String
+        
+        'Initialization of Values of variables
+        Ticker = Cells(2, "A")
+        Volume = Cells(2, "G")
+        Ticker_row = 2
+        openstock = Cells(2, "C")
+        closestock = Cells(2, "F")
+        max_change = 0
+        max_ticker = ""
+        min_change = 0
+        min_ticker = ""
+        
+        ' determine the last row of this sheet.
+        LastRowIndex = ws.Cells(ws.Rows.Count, "A").End(xlUp).Row
+        
+        ' go over all the remaining cells.
+        For i = 3 To LastRowIndex
+            ' if the cell matches the current ticker
+            If Cells(i, "A") = Ticker Then
+                ' update the volume and the closing stock.
+                Volume = Volume + Cells(i, "G")
+                closestock = Cells(i, "F")
+            Else
+                ' if a new ticker is found, then write the results to the ticker row.
+                Cells(Ticker_row, "J") = Volume
+                Cells(Ticker_row, "I") = Ticker
+                Yearlychange = closestock - openstock
+                Cells(Ticker_row, "K") = Yearlychange
+                If (closestock = 0) Then
+                    Percentagechange = 0
+                Else
+                    Percentagechange = ((closestock - openstock) / closestock) * 100
+                End If
+                Cells(Ticker_row, "L") = Percentagechange
+                
+                ' update maximum and minimum.
+                If max_ticker = "" Then
+                    max_ticker = Ticker
+                    max_change = Percentagechange
+                End If
+                If min_ticker = "" Then
+                    min_ticker = Ticker
+                    min_change = Percentagechange
+                End If
+                If Percentagechange > max_change Then
+                    max_change = Percentagechange
+                    max_ticker = Ticker
+                End If
+                If Percentagechange < min_change Then
+                    min_change = Percentagechange
+                    min_ticker = Ticker
+                End If
+                
+                ' go to the next ticker row (for the next ticker).
+                Ticker_row = Ticker_row + 1
+                
+                ' initialize the parameters for the next ticker.
+                Ticker = Cells(i, "A")
+                Volume = Cells(i, "G")
+                openstock = Cells(i, "C")
+            End If
+        Next i
+        
+        ' if we reached the end, we need to update the results for the last ticker.
+        Cells(Ticker_row, "J") = Volume
+        Cells(Ticker_row, "I") = Ticker
+        Yearlychange = closestock - openstock
+        If closestock = 0 Then
+            Percentagechange = 0
+        Else
+            Percentagechange = ((closestock - openstock) / closestock) * 100
+        End If
+        Cells(Ticker_row, "K") = Yearlychange
+        Cells(Ticker_row, "L") = Percentagechange
+        
+        ' update maximum and minimum as well.
+        If Percentagechange > max_change Then
+            max_change = Percentagechange
+            max_ticker = Ticker
+        End If
+        If Percentagechange < min_change Then
+            min_change = Percentagechange
+            min_ticker = Ticker
+        End If
+        
+        Cells(1, "O") = max_ticker
+        Cells(2, "O") = max_change
+        Cells(3, "O") = min_ticker
+        Cells(4, "O") = min_change
+   
+    Next ws
+    
+End Sub
+
+
+
+
+
+
